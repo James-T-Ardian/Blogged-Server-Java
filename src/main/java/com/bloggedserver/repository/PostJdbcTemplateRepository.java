@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.OptionalInt;
 
+
 @Repository
 public class PostJdbcTemplateRepository {
     private final JdbcTemplate jdbcTemplate;
@@ -27,32 +28,31 @@ public class PostJdbcTemplateRepository {
 
     }
 
-    public List<Post> getAllUserPost(String uploaderUsername) {
+    public List<Post> getByUsername(String uploaderUsername) {
         String sql = "SELECT * FROM posts WHERE uploader = ? ORDER BY post_id DESC";
         List<Post> sqlResult = jdbcTemplate.query(sql, new Object[]{uploaderUsername},
                 PostJdbcTemplateRepository::mapRow);
         return sqlResult;
     }
 
-    public List<Post> getUserPostByPostID(String uploaderUsername, int postId) {
-        String sql = "SELECT * FROM posts WHERE post_id = ? && uploader = ?";
-        List<Post> sqlResult = jdbcTemplate.query(sql, new Object[]{postId, uploaderUsername},
-                PostJdbcTemplateRepository::mapRow);
+    public List<Post> getById(int postId) {
+        String sql = "SELECT * FROM posts WHERE post_id = ?";
+        List<Post> sqlResult = jdbcTemplate.query(sql, new Object[]{postId}, PostJdbcTemplateRepository::mapRow);
         return sqlResult;
     }
 
-    public void createNewUserPost(String title, String body, String createdAt, String uploaderUsername) {
+    public int create(String title, String body, String createdAt, String uploaderUsername) {
         String sql = "INSERT INTO posts(title, body, created_at, uploader) VALUES (?, ?, ?, ?)";
-        jdbcTemplate.update(sql, title, body, createdAt, uploaderUsername);
+        return jdbcTemplate.update(sql, title, body, createdAt, uploaderUsername);
     }
 
-    public void updateUserPost(String title, String body, int postId) {
+    public int update(String title, String body, int postId) {
         String sql = "UPDATE posts SET title = ?, body = ? WHERE post_id  = ?";
-        jdbcTemplate.update(sql, title, body, postId);
+        return jdbcTemplate.update(sql, title, body, postId);
     }
 
-    public void deleteUserPost(int postId) {
+    public int delete(int postId) {
         String sql = "DELETE FROM posts WHERE post_id  = ?";
-        jdbcTemplate.update(sql, postId);
+        return jdbcTemplate.update(sql, postId);
     }
 }
