@@ -1,4 +1,4 @@
-package com.bloggedserver.model;
+package com.bloggedserver.user;
 
 import jakarta.validation.constraints.NotNull;
 
