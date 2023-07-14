@@ -40,7 +40,7 @@ public class PostJdbcTemplateRepository implements ListCrudRepository<Post, Inte
     }
 
     @Override
-    public <S extends Post> S save(S post){
+    public <S extends Post> S save(S post) {
         String sql;
         if (post.post_id().isPresent()) {
             sql = "UPDATE posts SET title = ?, body = ? WHERE post_id  = ?";
