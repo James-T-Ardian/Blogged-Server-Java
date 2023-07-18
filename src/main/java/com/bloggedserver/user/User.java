@@ -2,8 +2,8 @@ package com.bloggedserver.user;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +18,8 @@ import java.util.Collection;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class UserEntity implements UserDetails {
+@Table(name = "new_users_table") //Change name of table later to "users" after deleting old pre-java users table
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue
