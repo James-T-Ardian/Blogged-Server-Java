@@ -15,34 +15,34 @@ import java.util.OptionalInt;
 @Service
 public class PostService {
 
-    private final PostJdbcTemplateRepositoryImpl PostJdbcTemplateRepositoryImpl;
+    private final PostJdbcTemplateRepositoryImpl PostJdbcTemplateRepository;
 
     @Autowired
     public PostService(PostJdbcTemplateRepositoryImpl postJdbcTemplateRepositoryImpl) {
-        this.PostJdbcTemplateRepositoryImpl = postJdbcTemplateRepositoryImpl;
+        this.PostJdbcTemplateRepository = postJdbcTemplateRepositoryImpl;
     }
 
     public List<Post> getPostByUsername(@NotNull String uploaderUsername) {
-        return PostJdbcTemplateRepositoryImpl.findAllByUsername(uploaderUsername);
+        return PostJdbcTemplateRepository.findAllByUsername(uploaderUsername);
     }
 
     public Optional<Post> getPostById(int postId) {
-        return PostJdbcTemplateRepositoryImpl.findById(postId);
+        return PostJdbcTemplateRepository.findById(postId);
     }
 
     public Post createPost(@NotNull String title, @NotNull String body, @NotNull @Pattern(regexp = "^((19|20)" +
             "\\\\d\\\\d)-" + "(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$") String createdAt,
                            @NotNull String uploaderUsername) {
         Post newPost = new Post(OptionalInt.empty(), title, body, Optional.of(createdAt), uploaderUsername);
-        return PostJdbcTemplateRepositoryImpl.save(newPost);
+        return PostJdbcTemplateRepository.save(newPost);
     }
 
     public Post updatePost(@NotNull String title, @NotNull String body, int postId, @NotNull String uploaderUsername) {
         Post updatedPost = new Post(OptionalInt.of(postId), title, body, Optional.empty(), uploaderUsername);
-        return PostJdbcTemplateRepositoryImpl.save(updatedPost);
+        return PostJdbcTemplateRepository.save(updatedPost);
     }
 
     public void deletePost(int postId) {
-        PostJdbcTemplateRepositoryImpl.deleteById(postId);
+        PostJdbcTemplateRepository.deleteById(postId);
     }
 }
