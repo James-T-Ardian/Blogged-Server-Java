@@ -1,16 +1,14 @@
 package com.bloggedserver.post;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-
-// Note: refer to constraints set in Post model to get an idea of the method parameter constraints in this class
-// Temporary note (to be deleted later): service is where authentication logic will be in
 
 @Service
 public class PostService {
@@ -22,18 +20,32 @@ public class PostService {
         this.PostJdbcTemplateRepository = postJdbcTemplateRepositoryImpl;
     }
 
-    public List<Post> getPostByUsername(@NotNull String uploaderUsername) {
-        return PostJdbcTemplateRepository.findAllByUsername(uploaderUsername);
+    public List<Post> getPosts() {
+        Authentication authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
+        String authenticatedUser = authentication.getName();
+        return PostJdbcTemplateRepository.findAllByUsername(authenticatedUser);
     }
 
     public Optional<Post> getPostById(int postId) {
-        return PostJdbcTemplateRepository.findById(postId);
+        Authentication authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
+        String authenticatedUser = authentication.getName();
+        Optional<Post> post = PostJdbcTemplateRepository.findById(postId);
+        if (post.isPresent() && post.get()
+                .uploader()
+                .equals(authenticatedUser)) {
+            return post;
+        } else {
+            return Optional.empty();
+        }
     }
 
-    public Post createPost(@NotNull String title, @NotNull String body, @NotNull @Pattern(regexp = "^((19|20)" +
-            "\\\\d\\\\d)-" + "(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])$") String createdAt,
-                           @NotNull String uploaderUsername) {
-        Post newPost = new Post(OptionalInt.empty(), title, body, Optional.of(createdAt), uploaderUsername);
+    public Post createPost(String title, String body, String createdAt) {
+        Authentication authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
+        String authenticatedUser = authentication.getName();
+        Post newPost = new Post(OptionalInt.empty(), title, body, Optional.of(createdAt), authenticatedUser);
         return PostJdbcTemplateRepository.save(newPost);
     }
 
