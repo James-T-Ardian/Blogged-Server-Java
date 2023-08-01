@@ -2,9 +2,11 @@ package com.bloggedserver.post;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +26,22 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    //Todo: Create exception controller for invalid method argument so that returned response status will be 400
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    @ResponseStatus (HttpStatus.BAD_REQUEST)
+    public void handleInvalidRequestBody() {
+
+    }
+
+    @ExceptionHandler({DataAccessException.class})
+    @ResponseStatus (HttpStatus.INTERNAL_SERVER_ERROR)
+    public void handleJDBCDataAccessFailure() {
+
+    }
+
     @PostMapping("/")
     @ResponseStatus(HttpStatus.OK)
     public void createPost(@RequestBody @Valid CreatePostRequest request) {
-        Post posts = postService.createPost(request.getTitle(), request.getBody(), request.getCreated_at());
+        postService.createPost(request.getTitle(), request.getBody(), request.getCreated_at());
     }
 
     @GetMapping("/{postID}")
@@ -42,7 +55,15 @@ public class PostController {
         }
     }
 
-    //Todo: Create controller for updating posts and change service methods as necessary
+    @PutMapping("/{postID}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePost(@PathVariable(value = "postID") int postID, @Validated @RequestBody UpdatePostRequest request) {
+        postService.updatePost(request.getTitle(), request.getBody(), postID);
+    }
 
-    //Todo: Create controller for deleting posts and change service methods as necessary
+    @DeleteMapping ("/{postID}")
+    @ResponseStatus(HttpStatus.OK)
+    public void deletePost(@PathVariable(value = "postID") int postID) {
+        postService.deletePost(postID);
+    }
 }

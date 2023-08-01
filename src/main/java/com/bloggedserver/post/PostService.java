@@ -41,17 +41,21 @@ public class PostService {
         }
     }
 
-    public Post createPost(String title, String body, String createdAt) {
+    public void createPost(String title, String body, String createdAt) {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         String authenticatedUser = authentication.getName();
         Post newPost = new Post(OptionalInt.empty(), title, body, Optional.of(createdAt), authenticatedUser);
-        return PostJdbcTemplateRepository.save(newPost);
+        PostJdbcTemplateRepository.save(newPost);
     }
 
-    public Post updatePost(@NotNull String title, @NotNull String body, int postId, @NotNull String uploaderUsername) {
-        Post updatedPost = new Post(OptionalInt.of(postId), title, body, Optional.empty(), uploaderUsername);
-        return PostJdbcTemplateRepository.save(updatedPost);
+    // Todo: figure out how to make updates and deletes take into account authenticated user. May need to rehaul repository for this
+    public void updatePost(@NotNull String title, @NotNull String body, int postId) {
+        Authentication authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
+        String authenticatedUser = authentication.getName();
+        Post updatedPost = new Post(OptionalInt.of(postId), title, body, Optional.empty(), authenticatedUser);
+        PostJdbcTemplateRepository.save(updatedPost);
     }
 
     public void deletePost(int postId) {
