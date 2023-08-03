@@ -24,21 +24,15 @@ public class PostService {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         String authenticatedUser = authentication.getName();
-        return PostJdbcTemplateRepository.findAllByUsername(authenticatedUser);
+        return PostJdbcTemplateRepository.findAll(authenticatedUser);
     }
 
     public Optional<Post> getPostById(int postId) {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         String authenticatedUser = authentication.getName();
-        Optional<Post> post = PostJdbcTemplateRepository.findById(postId);
-        if (post.isPresent() && post.get()
-                .uploader()
-                .equals(authenticatedUser)) {
-            return post;
-        } else {
-            return Optional.empty();
-        }
+        Optional<Post> post = PostJdbcTemplateRepository.findById(postId, authenticatedUser);
+        return post;
     }
 
     public void createPost(String title, String body, String createdAt) {
@@ -49,8 +43,7 @@ public class PostService {
         PostJdbcTemplateRepository.save(newPost);
     }
 
-    // Todo: figure out how to make updates and deletes take into account authenticated user. May need to rehaul repository for this
-    public void updatePost(@NotNull String title, @NotNull String body, int postId) {
+    public void updatePost(String title, String body, int postId) {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         String authenticatedUser = authentication.getName();
@@ -59,6 +52,9 @@ public class PostService {
     }
 
     public void deletePost(int postId) {
-        PostJdbcTemplateRepository.deleteById(postId);
+        Authentication authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
+        String authenticatedUser = authentication.getName();
+        PostJdbcTemplateRepository.delete(postId, authenticatedUser);
     }
 }
