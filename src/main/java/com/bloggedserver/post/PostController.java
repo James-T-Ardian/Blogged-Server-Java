@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,12 +23,6 @@ public class PostController {
 
     private final PostService postService;
 
-    @GetMapping("/")
-    public ResponseEntity<List<Post>> getPosts() {
-        List<Post> posts = postService.getPosts();
-        return ResponseEntity.ok(posts);
-    }
-
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus (HttpStatus.BAD_REQUEST)
     public void handleInvalidRequestBody() {
@@ -34,7 +31,8 @@ public class PostController {
 
     @ExceptionHandler({DataAccessException.class})
     @ResponseStatus (HttpStatus.INTERNAL_SERVER_ERROR)
-    public void handleJDBCDataAccessFailure() {
+    public void handleJDBCDataAccessFailure(DataAccessException dataAccessException) {
+        System.out.println(dataAccessException.getMessage());
 
     }
 
@@ -44,11 +42,16 @@ public class PostController {
         postService.createPost(request.getTitle(), request.getBody(), request.getCreated_at());
     }
 
+    @GetMapping("/")
+    public ResponseEntity<GetPostResponse> getPostsByUsername(@RequestParam(value = "username") Optional<String> username) {
+        return ResponseEntity.ok(postService.getPostsByUsername(username));
+    }
+
     @GetMapping("/{postID}")
-    public ResponseEntity<Post> getPostById(@PathVariable(value = "postID") int postID) {
-        Optional<Post> post = postService.getPostById(postID);
-        if (post.isPresent()) {
-            return ResponseEntity.ok(post.get());
+    public ResponseEntity<GetPostResponse> getPostById(@PathVariable(value = "postID") int postID) {
+        GetPostResponse response = postService.getPostById(postID);
+        if (response.getPosts().size() > 0) {
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.notFound()
                     .build();

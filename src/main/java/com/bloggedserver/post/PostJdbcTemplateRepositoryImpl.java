@@ -32,7 +32,7 @@ public class PostJdbcTemplateRepositoryImpl implements PostJdbcTemplateRepositor
     }
 
     @Override
-    public List<Post> findAll(String uploaderUsername) {
+    public List<Post> findAllByUsername(String uploaderUsername) {
         String sql = "SELECT * FROM posts WHERE uploader = ? ORDER BY post_id DESC";
         List<Post> sqlResult = jdbcTemplate.query(sql, new Object[]{uploaderUsername},
                 PostJdbcTemplateRepositoryImpl::mapRow);
@@ -56,9 +56,9 @@ public class PostJdbcTemplateRepositoryImpl implements PostJdbcTemplateRepositor
     }
 
     @Override
-    public Optional<Post> findById(Integer postId, String uploaderUsername) {
-        String sql = "SELECT * FROM posts WHERE post_id = ? AND uploader = ?";
-        Optional<Post> optionalSqlResult = jdbcTemplate.query(sql, new Object[]{postId, uploaderUsername},
+    public Optional<Post> findById(Integer postId) {
+        String sql = "SELECT * FROM posts WHERE post_id = ?";
+        Optional<Post> optionalSqlResult = jdbcTemplate.query(sql, new Object[]{postId},
                         PostJdbcTemplateRepositoryImpl::mapRow)
                 .stream()
                 .findFirst();
@@ -66,7 +66,7 @@ public class PostJdbcTemplateRepositoryImpl implements PostJdbcTemplateRepositor
     }
 
     @Override
-    public void delete(Integer postId, String uploaderUsername) {
+    public void deleteByIdAndUsername(Integer postId, String uploaderUsername) {
         String sql = "DELETE FROM posts WHERE post_id  = ? AND uploader = ?";
         jdbcTemplate.update(sql, postId, uploaderUsername);
     }

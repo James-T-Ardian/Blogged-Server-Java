@@ -1,15 +1,18 @@
 package com.bloggedserver.post;
 
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+// Get functions allow you to get other user's posts. But users cannot update/delete other's posts nor
+// create posts under a different user
 @Service
 public class PostService {
 
@@ -20,19 +23,51 @@ public class PostService {
         this.PostJdbcTemplateRepository = postJdbcTemplateRepositoryImpl;
     }
 
-    public List<Post> getPosts() {
+    public boolean doesAuthenticatedUserOwnPost(Post post) {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         String authenticatedUser = authentication.getName();
-        return PostJdbcTemplateRepository.findAll(authenticatedUser);
+        return post.uploader().equals(authenticatedUser);
     }
 
-    public Optional<Post> getPostById(int postId) {
+    public GetPostResponse getPostsByUsername(Optional<String> username) {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         String authenticatedUser = authentication.getName();
-        Optional<Post> post = PostJdbcTemplateRepository.findById(postId, authenticatedUser);
-        return post;
+        List<Post> postList;
+        boolean isOwner;
+        if (username.isPresent()) {
+            postList = PostJdbcTemplateRepository.findAllByUsername(username.get());
+            isOwner = username.get().equals(authenticatedUser);
+        } else {
+            postList = PostJdbcTemplateRepository.findAllByUsername(authenticatedUser);
+            isOwner = true;
+        }
+
+        GetPostResponse response = GetPostResponse.builder()
+                .posts(postList)
+                .isOwner(isOwner)
+                .build();
+        return response;
+    }
+
+    public GetPostResponse getPostById(int postId) {
+        Optional<Post> post = PostJdbcTemplateRepository.findById(postId);
+        List<Post> postList = Collections.emptyList();
+        GetPostResponse response;
+        if (post.isPresent()) {
+            postList.add(post.get());
+            response = GetPostResponse.builder()
+                    .posts(postList)
+                    .isOwner(doesAuthenticatedUserOwnPost(postList.get(0)))
+                    .build();
+        } else {
+            response = GetPostResponse.builder()
+                    .posts(postList)
+                    .isOwner(false)
+                    .build();
+        }
+        return response;
     }
 
     public void createPost(String title, String body, String createdAt) {
@@ -55,6 +90,6 @@ public class PostService {
         Authentication authentication = SecurityContextHolder.getContext()
                 .getAuthentication();
         String authenticatedUser = authentication.getName();
-        PostJdbcTemplateRepository.delete(postId, authenticatedUser);
+        PostJdbcTemplateRepository.deleteByIdAndUsername(postId, authenticatedUser);
     }
 }

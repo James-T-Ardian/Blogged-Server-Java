@@ -5,15 +5,15 @@ import java.util.Optional;
 
 
 public interface PostJdbcTemplateRepository {
-    List<Post> findAll(String uploaderUsername);
+    List<Post> findAllByUsername(String uploaderUsername);
 
     <S extends Post> S save(S post);
 
 
-    Optional<Post> findById(Integer postId, String uploaderUsername);
+    Optional<Post> findById(Integer postId);
 
 
-    void delete(Integer postId, String uploaderUsername);
+    void deleteByIdAndUsername(Integer postId, String uploaderUsername);
 
 
 
