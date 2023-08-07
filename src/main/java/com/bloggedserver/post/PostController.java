@@ -32,7 +32,6 @@ public class PostController {
     @ExceptionHandler({DataAccessException.class})
     @ResponseStatus (HttpStatus.INTERNAL_SERVER_ERROR)
     public void handleJDBCDataAccessFailure(DataAccessException dataAccessException) {
-        System.out.println(dataAccessException.getMessage());
 
     }
 
@@ -40,11 +39,6 @@ public class PostController {
     @ResponseStatus(HttpStatus.OK)
     public void createPost(@RequestBody @Valid CreatePostRequest request) {
         postService.createPost(request.getTitle(), request.getBody(), request.getCreated_at());
-    }
-
-    @GetMapping("/")
-    public ResponseEntity<GetPostResponse> getPostsByUsername(@RequestParam(value = "username") Optional<String> username) {
-        return ResponseEntity.ok(postService.getPostsByUsername(username));
     }
 
     @GetMapping("/{postID}")
@@ -56,6 +50,11 @@ public class PostController {
             return ResponseEntity.notFound()
                     .build();
         }
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<GetPostResponse> getPostsByUsername(@RequestParam(value = "username") Optional<String> username) {
+        return ResponseEntity.ok(postService.getPostsByUsername(username));
     }
 
     @PutMapping("/{postID}")

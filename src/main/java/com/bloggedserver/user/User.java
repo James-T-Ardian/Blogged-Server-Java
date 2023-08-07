@@ -21,12 +21,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "new_users_table") //Change name of table later to "users" after deleting old pre-java users table
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
-    private Integer id;
     private String username;
     private String password;
 

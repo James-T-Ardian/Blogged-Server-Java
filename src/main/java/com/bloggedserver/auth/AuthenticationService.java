@@ -22,7 +22,12 @@ public class AuthenticationService {
                 .username(request.getUsername())
                 .password(passwordEncoder.encode((request.getPassword())))
                 .build();
-        repository.save(user);
+        System.out.println(repository.findByUsername(request.getUsername()).isEmpty());
+        if (repository.findByUsername(request.getUsername()).isEmpty()){
+            repository.save(user);
+        } else {
+            throw new DuplicateUserException();
+        }
         String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
