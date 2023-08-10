@@ -9,7 +9,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${MYSQL_USERNAME}
-    url: jdbc:mysql://localhost:3306/blogged-db
+    url: ${MYSQL_URL}
     password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
